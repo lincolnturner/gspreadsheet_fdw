@@ -46,7 +46,7 @@ In essence:
 * Put it in the first (and only) worksheet
 
 Get the Google API 'key' (for want of a better term), which is a 44-character string 
-matching regexp [A-Za-z0-9_]{44}. It lives between the `/spreadsheets/d/` and possible 
+matching regexp `[A-Za-z0-9_]{44}`. It lives between the `/spreadsheets/d/` and possible 
 trailing `/edit/blah` in the URL of your Google Spreadsheet.
 
 ### Create the foreign table
@@ -69,9 +69,9 @@ CREATE FOREIGN TABLE staff_gspreadsheet (
 ```
 
 ### Try querying it
-You should be able to try this example, the key corresponds to a small public test table. 
-You will of course need to change the `email` parameter to your google account and
-the password to your google account password. 
+You should be able to try this example, the `key` corresponds to a small public test table. 
+You will of course need to change the `email` parameter to your Google account and
+the password to your Google password. 
 
 Then you should be able to execute queries against your new foreign table:
 ```sql
@@ -87,7 +87,6 @@ Should produce:
  Eugene         | Wigner   | 40921 | 26.114
  Ettore         | Majorana | 40010 | 26.117
 (5 rows)
-
 
 ```
 
@@ -124,6 +123,6 @@ Very minimal functionality implemented so far.
 * Sensible type awareness, at least numeric versus text
 * Handle quals properly, i.e find out what pg emits and what gdata understand
   (Example: `name LIKE 'Blog%'` emits `name~~'Blog%'` which gdata API doesn't understand)
-* Some sort of sane authentication that doesn't involve google passwords in the data catalog!
+* Some sort of sane authentication that doesn't involve Google passwords in the data catalog!
 
 
