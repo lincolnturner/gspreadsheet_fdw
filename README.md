@@ -36,6 +36,7 @@ options (
   wrapper 'gspreadsheet_fdw.GspreadsheetFdw' );
 ```
 
+### Make a Google Spreadsheet 
 Head over to Google Drive and make a Google Spreadsheet which conforms to the 
 rules of a 
 [list-based feed](https://developers.google.com/google-apps/spreadsheets/#working_with_list-based_feeds). 
@@ -48,6 +49,7 @@ Get the Google API 'key' (for want of a better term), which is a 44-character st
 matching regexp [A-Za-z0-9_]{44}. It lives between the `/spreadsheets/d/` and possible 
 trailing `/edit/blah` in the URL of your Google Spreadsheet.
 
+### Create the foreign table
 You can then use 'normal' DDL to create a foreign table with column names that match those 
 in your spreadsheet. The gdata API seems to automatically downcase and remove spaces from
 the column headers, which is very handy. But probably best not relied on. Give your columns 
@@ -65,6 +67,8 @@ CREATE FOREIGN TABLE staff_gspreadsheet (
   key '1hoYrcViweamARnxdU1IW-Ivd8hjKHKPzkGSLbKHLeno'
 );
 ```
+
+### Try querying it
 You should be able to try this example, the key corresponds to a small public test table. 
 You will of course need to change the `email` parameter to your google account and
 the password to your google account password. 
@@ -87,6 +91,24 @@ Should produce:
 
 ```
 
+### Qualifiers 
+Qualifiers are in essence SQL `WHERE` clauses which are sent down to the foreign data wrapper
+to reduce the traffic on the network. For example, executing
+
+```sql
+SELECT * FROM staff_gspreadsheet WHERE surname='Ramsey';
+```
+
+is translated into a Google list-feed 'query' which returns only that row. At present, anything
+more sophisticated than this gets mistranslated (largely due to type-casting issues, i.e. 
+everything is a `VARCHAR` right now.
+
+Removing the quals code altogether makes things work better, as without quals processing the 
+whole foreign table is always returned but postgres then does the right thing and applies the
+WHERE clause once it gets its hands on the data. To be fixed soon.
+
+## Further info
+
 ### Materialized views
 Google Drive is always available, except when it isn't. Materialized views are a 
 wonderful thing and highly recommended for caching your online data in PostgreSQL. 
@@ -99,6 +121,7 @@ Very minimal functionality implemented so far.
 
 ## To do
 * Insert, update and delete 
+* Sensible type awareness, at least numeric versus text
 * Handle quals properly, i.e find out what pg emits and what gdata understand
   (Example: `name LIKE 'Blog%'` emits `name~~'Blog%'` which gdata API doesn't understand)
 * Some sort of sane authentication that doesn't involve google passwords in the data catalog!
