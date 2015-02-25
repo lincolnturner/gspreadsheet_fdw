@@ -1,18 +1,19 @@
 
-CREATE EXTENSION multicorn;
+-- CREATE EXTENSION multicorn;
 
-DROP SERVER multicorn_gspreadsheet CASCADE;
+-- DROP SERVER multicorn_gspreadsheet CASCADE;
 
 CREATE SERVER multicorn_gspreadsheet FOREIGN DATA WRAPPER multicorn
 options (
   wrapper 'gspreadsheet_fdw.GspreadsheetFdw' );
 
-CREATE FOREIGN TABLE test_gspreadsheet (
-    timestamp  character varying,
-    username   character varying,
-    anothercol character varying
+CREATE FOREIGN TABLE staff_gspreadsheet (
+  givenname character varying,
+  surname   character varying,
+  phone     character varying,
+  office    character varying
 ) server multicorn_gspreadsheet options(
-  email 'myemail@gmail.com'
-  password 'B!g$ecreT',
-  key '4r0WPTB3AYrJgXzVZUU7aoE8oPsJgRnMzlAri0972hdg'
+  email 'yourname@gmail.com',
+  password 'yourB!g$ecreT',
+  key '1hoYrcViweamARnxdU1IW-Ivd8hjKHKPzkGSLbKHLeno'
 );
