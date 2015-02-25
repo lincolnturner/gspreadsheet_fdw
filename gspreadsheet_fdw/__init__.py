@@ -29,8 +29,7 @@ class GspreadsheetFdw(ForeignDataWrapper):
         query = (' and ').join(qualstrings)
         log_to_postgres("Query string is %s" % query, DEBUG)
         gd_query = gss.ListQuery()
-        if query:
-            gd_query.sq = query
+        gd_query.sq = query or None
         feed = self.gd_client.GetListFeed(self.key, query=gd_query)
         for row in feed.entry:
             rowdict = dict([(col, row.custom[col].text) for col in self.column_names])
