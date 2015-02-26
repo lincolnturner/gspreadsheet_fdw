@@ -103,7 +103,7 @@ more sophisticated than this gets mistranslated (largely due to type-casting iss
 everything is a `VARCHAR` right now).
 
 First thing to do in type-aware-qualifiers branch is to selectively quote only character 
-and text values and not quote numerical values. 
+and text values and not quote numerical values.
 
 Removing the quals code altogether makes things work better, as without quals processing the 
 whole foreign table is always returned but postgres then does the right thing and applies the
