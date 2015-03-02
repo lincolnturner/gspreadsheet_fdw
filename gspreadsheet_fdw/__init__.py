@@ -24,9 +24,11 @@ class GspreadsheetFdw(ForeignDataWrapper):
 
     def execute(self, quals, columns):
         self.gd_client.ProgrammaticLogin()
-        qualstrings = [qual.field_name+qual.operator+'"'+qual.value+'"'
-                       for qual in quals]
-        query = (' and ').join(qualstrings)
+        qualstrings = []
+        for qual in quals:
+            qualstring = qual.field_name+qual.operator+'"'+qual.value+'"'
+            qualstrings.append(qualstring)
+        query = ' and '.join(qualstrings)
         log_to_postgres("Query string is %s" % query, DEBUG)
         gd_query = gss.ListQuery()
         gd_query.sq = query or None
