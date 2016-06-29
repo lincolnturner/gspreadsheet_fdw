@@ -6,7 +6,7 @@ import gspread
 
 class GspreadsheetFdw(ForeignDataWrapper):
     def __init__(self, fdw_options, fdw_columns):
-    """A Google Spreadsheets Foreign Wrapper.
+        """A Google Spreadsheets Foreign Wrapper.
     The following options are required:
     gskey     -- the key from the gsheet URL
     headrow   -- which row of the spreadsheet to take column names from. Defaults to 1.
@@ -18,7 +18,7 @@ class GspreadsheetFdw(ForeignDataWrapper):
                    This will make a new email address ending in gserviceaccount.com
                    Yes, it's roundabout, I can't help it...
                  Then just share your gsheetd with the @...gserviceaccount.com email address.
-    """
+        """
         super(GspreadsheetFdw, self).__init__(fdw_options, fdw_columns)
         self.columns  = fdw_columns
         self.headrow  = fdw_options.get('headrow',1)  
