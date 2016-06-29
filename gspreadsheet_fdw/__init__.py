@@ -1,36 +1,32 @@
+
 from multicorn import ForeignDataWrapper
 from multicorn.utils import log_to_postgres, ERROR, WARNING, DEBUG
-import gdata.spreadsheet.service as gss
-
-# Thanks to https://github.com/yoavaviram/python-google-spreadsheet    
-# for working out the row.custom nonsense!
+from oauth2client.service_account import ServiceAccountCredentials
+import gspread
 
 class GspreadsheetFdw(ForeignDataWrapper):
+    def __init__(self, fdw_options, fdw_columns):
     """A Google Spreadsheets Foreign Wrapper.
     The following options are required:
-    key       -- the google spreadsheet key, looks like 45 alphanumerics
-    email     -- your google login. Works with domain emails too it seems.
-    password  -- your google password. In the clear and all. Sorry!
+    gskey     -- the key from the gsheet URL
+    headrow   -- which row of the spreadsheet to take column names from. Defaults to 1.
+    keyfile   -- the path (on the postgresql-server!) to the .json file containing the appropriate credentials
+                 see https://github.com/burnash/gspread and http://gspread.readthedocs.org/en/latest/oauth2.html ,
+                 basically, go to https://console.developers.google.com/
+                   make (or choose) a project, choose "Enable or manage APIs", enable "Drive API",
+                   choose Credentials, then "New credentials", then "server account key".
+                   This will make a new email address ending in gserviceaccount.com
+                   Yes, it's roundabout, I can't help it...
+                 Then just share your gsheetd with the @...gserviceaccount.com email address.
     """
-
-    def __init__(self, fdw_options, fdw_columns):
         super(GspreadsheetFdw, self).__init__(fdw_options, fdw_columns)
-        self.gd_client = gss.SpreadsheetsService()
-        self.key                = fdw_options["key"]
-        self.gd_client.email    = fdw_options["email"]
-        self.gd_client.password = fdw_options["password"]
-        self.column_list  = fdw_columns
-        self.column_names = fdw_columns.keys()
+        self.columns  = fdw_columns
+        self.headrow  = fdw_options.get('headrow',1)  
+        scopes = ['https://spreadsheets.google.com/feeds']
+        credentials = ServiceAccountCredentials.from_json_keyfile_name(fdw_options["keyfile"], scopes)
+        gc = gspread.authorize(credentials)
+        self.wks = gc.open_by_key(fdw_options["gskey"]).sheet1
 
     def execute(self, quals, columns):
-        self.gd_client.ProgrammaticLogin()
-        qualstrings = [qual.field_name+qual.operator+'"'+qual.value+'"'
-                       for qual in quals]
-        query = (' and ').join(qualstrings)
-        log_to_postgres("Query string is %s" % query, DEBUG)
-        gd_query = gss.ListQuery()
-        gd_query.sq = query or None
-        feed = self.gd_client.GetListFeed(self.key, query=gd_query)
-        for row in feed.entry:
-            rowdict = dict([(col, row.custom[col].text) for col in self.column_names])
-            yield rowdict
+        return self.wks.get_all_records(head=self.headrow);
+
